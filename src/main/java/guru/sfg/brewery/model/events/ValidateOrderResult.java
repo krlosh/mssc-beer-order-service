@@ -1,5 +1,6 @@
 package guru.sfg.brewery.model.events;
 
+import guru.sfg.beer.order.service.domain.BeerOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,5 @@ import java.util.UUID;
 public class ValidateOrderResult {
     private UUID id = null;
     private Boolean isValid;
+    private BeerOrder beerOrder;
 }
