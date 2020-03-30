@@ -14,6 +14,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -28,10 +29,12 @@ public class AllocateOrderAction implements Action<BeerOrderStatusEnum, BeerOrde
     @Override
     public void execute(StateContext<BeerOrderStatusEnum, BeerOrderEventEnum> stateContext) {
         String beerOrderId = (String)stateContext.getMessage().getHeaders().get(BeerOrderManagerImpl.ORDER_ID_HEADER);
-        BeerOrder beerOrder = this.beerOrderRepository.findOneById(UUID.fromString(beerOrderId));
-        jmsTemplate.convertAndSend(JmsConfiguration.ALLOCATE_ORDER_QUEUE,
-                this.mapper.beerOrderToDto(beerOrder));
+        Optional<BeerOrder> beerOrderOptional = this.beerOrderRepository.findById(UUID.fromString(beerOrderId));
 
-        log.debug("Sent allocation request for order id: " + beerOrderId);
+        beerOrderOptional.ifPresentOrElse(beerOrder -> {
+                    jmsTemplate.convertAndSend(JmsConfiguration.ALLOCATE_ORDER_QUEUE,
+                            mapper.beerOrderToDto(beerOrderOptional.get()));
+                    log.debug("Sent Allocation Request for order id: " + beerOrderId);
+                }, () -> log.error("Beer Order Not Found!"));
     }
 }

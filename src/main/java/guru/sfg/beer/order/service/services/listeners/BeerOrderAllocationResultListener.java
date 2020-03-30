@@ -1,6 +1,7 @@
-package guru.sfg.beer.order.service.services;
+package guru.sfg.beer.order.service.services.listeners;
 
 import guru.sfg.beer.order.service.config.JmsConfiguration;
+import guru.sfg.beer.order.service.services.BeerOrderManager;
 import guru.sfg.brewery.model.events.AllocateOrderResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +17,14 @@ public class BeerOrderAllocationResultListener {
 
     @JmsListener(destination = JmsConfiguration.ALLOCATE_ORDER_RESPONSE_QUEUE)
     public void listen(AllocateOrderResult result) {
-        log.debug("Allocation order result for Order id:" + result.getBeerOrder().getId());
+        log.debug("Allocation order result for Order id:" + result.getBeerOrderDto().getId());
 
         if(result.getAllocationError()) {
-            beerOrderManager.beerOrderAllocationFailed(result.getBeerOrder());
+            beerOrderManager.beerOrderAllocationFailed(result.getBeerOrderDto());
         } else if( result.getPendingInventory()) {
-            this.beerOrderManager.beerOrderAllocationPendingInventory(result.getBeerOrder());
+            this.beerOrderManager.beerOrderAllocationPendingInventory(result.getBeerOrderDto());
         } else {
-            this.beerOrderManager.beerOrderAllocationPassed(result.getBeerOrder());
+            this.beerOrderManager.beerOrderAllocationPassed(result.getBeerOrderDto());
         }
     }
 }

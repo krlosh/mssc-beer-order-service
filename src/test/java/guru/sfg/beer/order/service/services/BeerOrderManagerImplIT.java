@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,10 +45,10 @@ public class BeerOrderManagerImplIT {
     CustomerRepository customerRepository;
 
     @Autowired
-    WireMockServer wireMockServer;
+    ObjectMapper objectMapper;
 
     @Autowired
-    ObjectMapper objectMapper;
+    WireMockServer wireMockServer;
 
     Customer testCustomer;
 
@@ -64,7 +65,7 @@ public class BeerOrderManagerImplIT {
     static class RestTemplateBuilderProvider {
 
         @Bean(destroyMethod = "stop")
-        public WireMockServer server() {
+        public WireMockServer wireMockServer(){
             WireMockServer server = with(wireMockConfig().port(8083));
             server.start();
             return server;
@@ -72,21 +73,26 @@ public class BeerOrderManagerImplIT {
     }
 
     @Test
-    void testNewToAllocated() throws JsonProcessingException {
+    void testNewToAllocated() throws JsonProcessingException, InterruptedException {
         BeerDto beerDto = BeerDto.builder().id(beerId).upc("12345").build();
 
-        wireMockServer.stubFor(get(BeerServiceImpl.BEER_PATH_V1 + "12345")
-                .willReturn(okJson(objectMapper.writeValueAsString(beerDto))));
+        wireMockServer.stubFor(get(BeerServiceImpl.BEER_UPC_PATH_V1 + "12345")
+        .willReturn(okJson(objectMapper.writeValueAsString(beerDto))));
 
-        BeerOrder beerOrder =  createBeerOrder();
-        BeerOrder savedBeerOrder = this.beerOrderManager.newBeerOrder(beerOrder);
+        BeerOrder beerOrder = createBeerOrder();
+
+        BeerOrder savedBeerOrder = beerOrderManager.newBeerOrder(beerOrder);
 
         await().untilAsserted(()-> {
             BeerOrder foundOrder = beerOrderRepository.findById(beerOrder.getId()).get();
             assertEquals(BeerOrderStatusEnum.ALLOCATION_PENDING, foundOrder.getOrderStatus());
         });
+
+        BeerOrder savedBeerOrder2 = beerOrderRepository.findById(savedBeerOrder.getId()).get();
+
         assertNotNull(savedBeerOrder);
-        assertEquals(BeerOrderStatusEnum.ALLOCATED, savedBeerOrder.getOrderStatus());
+        assertEquals(BeerOrderStatusEnum.ALLOCATED, savedBeerOrder2.getOrderStatus());
+
     }
 
     public BeerOrder createBeerOrder() {
@@ -96,11 +102,13 @@ public class BeerOrderManagerImplIT {
 
         BeerOrderLine line = BeerOrderLine.builder()
                 .beerId(beerId)
+                .upc("12345")
                 .orderQuantity(1)
                 .beerOrder(beerOrder)
                 .build();
 
-        Set<BeerOrderLine> lines = Set.of(line);
+        Set<BeerOrderLine> lines = new HashSet<>();
+        lines.add(line);
         beerOrder.setBeerOrderLines(lines);
 
         return beerOrder;
