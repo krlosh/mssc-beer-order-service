@@ -134,4 +134,14 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
 
         return sm;
     }
+
+    @Override
+    public void beerOrderPickedUp(UUID id) {
+        Optional<BeerOrder> optionalBeerOrder = this.beerOrderRepository.findById(id);
+
+        optionalBeerOrder.ifPresentOrElse(beerOrder -> {
+            sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.BEERORDER_PICKED_UP);
+        },
+        ()->log.error("Beer order not found id: " + id));
+    }
 }
