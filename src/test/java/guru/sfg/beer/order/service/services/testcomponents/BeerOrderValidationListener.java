@@ -22,9 +22,13 @@ public class BeerOrderValidationListener {
 
         ValidateOrderRequest request = (ValidateOrderRequest) message.getPayload();
 
+        boolean isValid = true;
+        if ("validation-fail".equals(request.getBeerOrder().getCustomerRef())) {
+            isValid = false;
+        }
         jmsTemplate.convertAndSend(JmsConfiguration.VALIDATE_ORDER_RESPONSE_QUEUE,
                 ValidateOrderResult.builder()
-                        .isValid(true)
+                        .isValid(isValid)
                         .orderId(request.getBeerOrder().getId())
                         .build());
     }
