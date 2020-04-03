@@ -19,7 +19,7 @@ public class BeerOrderStateMachineConfigurator extends StateMachineConfigurerAda
 
     private final Action<BeerOrderStatusEnum, BeerOrderEventEnum> validateOrderAction;
     private final Action<BeerOrderStatusEnum, BeerOrderEventEnum> allocateOrderAction;
-
+    private final Action<BeerOrderStatusEnum, BeerOrderEventEnum> validationFailureAction;
     @Override
     public void configure(StateMachineStateConfigurer<BeerOrderStatusEnum, BeerOrderEventEnum> states) throws Exception {
         states.withStates()
@@ -47,6 +47,7 @@ public class BeerOrderStateMachineConfigurator extends StateMachineConfigurerAda
                 .source(BeerOrderStatusEnum.VALIDATION_PENDING)
                 .target(BeerOrderStatusEnum.VALIDATION_EXCEPTION)
                 .event(BeerOrderEventEnum.VALIDATION_FAILED)
+                .action(validationFailureAction)
             .and().withExternal()
                 .source(BeerOrderStatusEnum.VALIDATED)
                 .target(BeerOrderStatusEnum.ALLOCATION_PENDING)
