@@ -34,7 +34,7 @@ public class BeerOrderAllocationListener {
                 beerOrderLineDto.setQuantityAllocated(beerOrderLineDto.getOrderQuantity());
             }
         });
-        
+
         jmsTemplate.convertAndSend(JmsConfiguration.ALLOCATE_ORDER_RESPONSE_QUEUE,
                 AllocateOrderResult.builder()
                     .beerOrderDto(request.getBeerOrderDto())
