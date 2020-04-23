@@ -40,7 +40,7 @@ public class BeerOrderController {
         this.beerOrderService = beerOrderService;
     }
 
-    @GetMapping( path = {"","/"})
+    @GetMapping( path = {"","/"}) //TODO Create Customer controller (beer order service #43)
     public CustomerPagedList listCustomers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
                                            @RequestParam(value = "pageSize", required = false) Integer pageSize){
         if (pageNumber == null || pageNumber < 0){
