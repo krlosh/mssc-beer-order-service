@@ -121,17 +121,5 @@ public class BeerOrderServiceImpl implements BeerOrderService {
         throw new RuntimeException("Customer Not Found");
     }
 
-    @Override
-    public CustomerPagedList listCustomers(Pageable pageable) {
-        Page<Customer> customerPage = this.customerRepository.findAll(pageable);
-        return new CustomerPagedList(
-                customerPage
-                    .stream()
-                    .map(customerMapper::customerToDto)
-                    .collect(Collectors.toList()),
-                PageRequest.of(
-                        customerPage.getPageable().getPageNumber(),
-                        customerPage.getPageable().getPageSize()),
-                customerPage.getTotalElements());
-    }
+
 }

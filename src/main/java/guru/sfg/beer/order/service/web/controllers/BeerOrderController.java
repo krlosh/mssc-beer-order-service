@@ -20,14 +20,13 @@ package guru.sfg.beer.order.service.web.controllers;
 import guru.sfg.beer.order.service.services.BeerOrderService;
 import guru.sfg.brewery.model.BeerOrderDto;
 import guru.sfg.brewery.model.BeerOrderPagedList;
-import guru.sfg.brewery.model.CustomerPagedList;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@RequestMapping("/api/v1/customers")
+@RequestMapping("/api/v1/customers/{customerId}")
 @RestController
 public class BeerOrderController {
 
@@ -40,20 +39,7 @@ public class BeerOrderController {
         this.beerOrderService = beerOrderService;
     }
 
-    @GetMapping( path = {"","/"}) //TODO Create Customer controller (beer order service #43)
-    public CustomerPagedList listCustomers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-                                           @RequestParam(value = "pageSize", required = false) Integer pageSize){
-        if (pageNumber == null || pageNumber < 0){
-            pageNumber = DEFAULT_PAGE_NUMBER;
-        }
-
-        if (pageSize == null || pageSize < 1) {
-            pageSize = DEFAULT_PAGE_SIZE;
-        }
-        return beerOrderService.listCustomers(PageRequest.of(pageNumber, pageSize));
-    }
-
-    @GetMapping("/{customerId}/orders")
+    @GetMapping("/orders")
     public BeerOrderPagedList listOrders(@PathVariable("customerId") UUID customerId,
                                          @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
                                          @RequestParam(value = "pageSize", required = false) Integer pageSize){
@@ -69,18 +55,18 @@ public class BeerOrderController {
         return beerOrderService.listOrders(customerId, PageRequest.of(pageNumber, pageSize));
     }
 
-    @PostMapping("/{customerId}/orders")
+    @PostMapping("/orders")
     @ResponseStatus(HttpStatus.CREATED)
     public BeerOrderDto placeOrder(@PathVariable("customerId") UUID customerId, @RequestBody BeerOrderDto beerOrderDto){
         return beerOrderService.placeOrder(customerId, beerOrderDto);
     }
 
-    @GetMapping("/{customerId}/orders/{orderId}")
+    @GetMapping("/orders/{orderId}")
     public BeerOrderDto getOrder(@PathVariable("customerId") UUID customerId, @PathVariable("orderId") UUID orderId){
         return beerOrderService.getOrderById(customerId, orderId);
     }
 
-    @PutMapping("/{customerId}/orders/{orderId}/pickup")
+    @PutMapping("/orders/{orderId}/pickup")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void pickupOrder(@PathVariable("customerId") UUID customerId, @PathVariable("orderId") UUID orderId){
         beerOrderService.pickupOrder(customerId, orderId);
