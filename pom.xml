@@ -16,6 +16,9 @@
 
     <description>MSSC Beer Order Service</description>
 
+    <properties>
+        <docker.image.prefix>krlosh</docker.image.prefix>
+    </properties>
 
     <dependencies>
         <dependency>
